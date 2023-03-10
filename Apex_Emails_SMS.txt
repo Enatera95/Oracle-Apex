@@ -1,0 +1,77 @@
+Apex Emails and SMS
+
+Sending Emails from Apex Applications
+========================================
+Generate SMTP credentials for your OCI Account.
+
+	+ SMTP Host Name
+	+ SMTP Username
+	+ SMTP Password
+
+Set these parameters in your database where Apex is installed.
+=================================================================================================================
+BEGIN
+    APEX_INSTANCE_ADMIN.SET_PARAMETER('SMTP_HOST_ADDRESS', 'smtp.email.ap-sydney-1.oci.oraclecloud.com');
+    APEX_INSTANCE_ADMIN.SET_PARAMETER('SMTP_USERNAME', 'ocid1.user.oc1..aaaaaaaa5i4npowgy56car6wulpp6avs2rpamada5gaw2mv7lff67hcwpy6q@ocid1.tenancy.oc1..aaaaaaaab2rzv5jt2kamfts7k2eodlyxgdgxhf26zvvhi2i5zzrqcdrru72q.9d.com');
+    APEX_INSTANCE_ADMIN.SET_PARAMETER('SMTP_PASSWORD', 'xxxxxxxxxxxxxxxxxxxx');
+COMMIT;
+END;
+/
+
+=================================================================================================================
+
+
+
+Add a sender email address to your OCI Approved Senders list -- Developer Services -> Email Delivery.
+
+Gmail, Hotmail, Yahoo mail and other public mail service providers are not allowed. We are only allowed to use
+mailboxes that we manage and own.
+=================================================================================================================
+
+Try sending an email.
+=================================================================================================================
+
+DECLARE
+sender1 varchar2(100) := 'enatera@enateraportfolio.com';
+sender2 varchar2(100) := 'test@enateraportfolio.com';
+BEGIN
+apex_mail.send(
+	p_from => sender1,
+	p_to => :P1_TO,
+	p_subj => :P1_SUBJ,
+	p_body => :P1_BODY);
+apex_mail.push_queue();
+END;
+
+=================================================================================================================
+
+Sending SMSs from Apex Applications using Twilio SMS API
+=====================================
+
+declare
+l_result clob;
+l_method_url varchar2(4000) := 'https://api.twilio.com/2010-04-01/Accounts/AC10b9f94f0e48bd5cf0f118f539bfadf7/Messages.json';
+http_method varchar2(10) := 'POST';
+username varchar2(40) := 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+passwd varchar2(40) := 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+-- SMS body
+sms_body varchar2(4000) := :P1_BODY;
+-- To number
+to_number varchar2(15) := :P1_TO;
+-- From phone number
+from_number varchar2(15) := '+13143504539';
+
+begin
+    apex_web_service.g_request_headers(1).name := 'Content-Type';
+    apex_web_service.g_request_headers(1).value := 'application/x-www-form-urlencoded';
+
+    l_result := apex_web_service.make_rest_request(
+        p_url => l_method_url,
+        p_http_method => http_method,
+        p_username => username,
+        p_password => passwd,
+        p_parm_name => apex_string.string_to_table('Body:To:From', ':'),
+        p_parm_value => apex_string.string_to_table(sms_body||':'|| to_number ||':'|| from_number ||':'));
+
+    dbms_output.put_line(l_result);
+end;
