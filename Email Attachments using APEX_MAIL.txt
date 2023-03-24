@@ -1,5 +1,5 @@
 -- This PL/SQL script sends an email with an attachment when run in the Oracle APEX SQL Workshop.
--- It is to be modified to be modified as a PL/SQL process in an email page.
+-- It is to be modified and turn into a PL/SQL process in an emailing page.
 
 DECLARE
 	l_mail_id NUMBER;
