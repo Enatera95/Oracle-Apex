@@ -1,0 +1,31 @@
+-- This PL/SQL script sends an email with an attachment when run in the Oracle APEX SQL Workshop.
+-- It is to be modified to be modified as a PL/SQL process in an email page.
+
+DECLARE
+	l_mail_id NUMBER;
+	-- l_blob blob;
+	l_clob clob;
+
+    l_attach BLOB;
+    l_filename varchar2(200);
+    l_mimetype varchar2(50);
+BEGIN
+	-- l_blob := UTL_RAW.cast_to_raw('This could be a document or image.');
+    -- l_blob := UTL_RAW.cast_to_raw('This could be a document or image.');
+	-- l_clob := 'This could be any CLOB information';
+
+    select ATTACH, FILENAME, MIMETYPE into l_attach, l_filename, l_mimetype from attachments where id = 3;
+
+	l_mail_id := apex_mail.send(
+		p_to => 'enatera@datec.com.pg',
+		p_from => 'enatera@enateraportfolio.com',
+		p_body => 'Attachment message body.',
+		p_subj => 'Attachment message subject.');
+
+	apex_mail.add_attachment(
+		p_mail_id => l_mail_id,
+		p_attachment => l_attach,
+		p_filename => l_filename,
+		p_mime_type => l_mimetype);
+END;
+/
